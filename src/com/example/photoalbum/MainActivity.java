@@ -1,11 +1,15 @@
 package com.example.photoalbum;
 
+import java.util.List;
+
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -21,6 +25,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.Gallery;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 public class MainActivity extends Activity {
@@ -36,6 +41,7 @@ public class MainActivity extends Activity {
 	//adapter for gallery view
 	private PicAdapter imgAdapt;
 	private Button edit;
+	private ImageButton takePhoto;
 	private boolean isclick = false;
 
 	@Override
@@ -87,6 +93,23 @@ public class MainActivity extends Activity {
 		        picView.setImageBitmap(imgAdapt.getPic(position));
 		    }
 		});
+		takePhoto = (ImageButton)findViewById(R.id.imageButton1);
+		takePhoto.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	}
+	
+	public static boolean isIntentAvailable(Context context, String action) {
+	    final PackageManager packageManager = context.getPackageManager();
+	    final Intent intent = new Intent(action);
+	    List<ResolveInfo> list =
+	            packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+	    return list.size() > 0;
 	}
 	
 	public class PicAdapter extends BaseAdapter {
