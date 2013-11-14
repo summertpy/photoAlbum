@@ -43,6 +43,8 @@
                 android:id="@+id/editevent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:enabled="false"
+                android:inputType="text"
                 android:ems="10" >
 
                 <requestFocus />
@@ -65,6 +67,8 @@
                 android:id="@+id/editplace"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:enabled="false"
+                android:inputType="text"
                 android:ems="10" />
 
         </TableRow>
@@ -84,6 +88,8 @@
                 android:id="@+id/editdate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:enabled="false"
+                android:inputType="text"
                 android:ems="10" />
 
         </TableRow>
@@ -103,6 +109,8 @@
                 android:id="@+id/editwho"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:enabled="false"
+                android:inputType="text"
                 android:ems="10" />
 
         </TableRow>

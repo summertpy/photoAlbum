@@ -52,7 +52,6 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		System.out.println("asd");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		etEvent = (EditText)findViewById(R.id.editevent);
@@ -157,27 +156,21 @@ public class MainActivity extends Activity {
 		    galleryContext = c;
 		    
 			albumdao.open();
-			ArrayList<String> al = albumdao.getAllImgPath();
-			albumdao.close();		
-		    
-		    //create bitmap array
-		    imageBitmaps  = new Bitmap[10];
-		    placeholder  = new Bitmap[10];
-		    //decode the placeholder image
-	    	placeholder[0] = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-	    	placeholder[1] = BitmapFactory.decodeResource(getResources(), R.drawable.bleh);
-	    	placeholder[2] = BitmapFactory.decodeResource(getResources(), R.drawable.dance);
-	    	placeholder[3] = BitmapFactory.decodeResource(getResources(), R.drawable.hehe);
-	    	placeholder[4] = BitmapFactory.decodeResource(getResources(), R.drawable.hiao);
-	    	placeholder[5] = BitmapFactory.decodeResource(getResources(), R.drawable.what);
-	    	placeholder[6] = BitmapFactory.decodeResource(getResources(), R.drawable.yeah);
-	    	placeholder[7] = BitmapFactory.decodeResource(getResources(), R.drawable.yeah2);
-	    	placeholder[8] = BitmapFactory.decodeResource(getResources(), R.drawable.mickeyblind);
-	    	placeholder[9] = BitmapFactory.decodeResource(getResources(), R.drawable.onigoat);
-		    //more processing
-		    //set placeholder as all thumbnail images in the gallery initially
-		    for(int i=0; i<imageBitmaps.length; i++)
-		        imageBitmaps[i]=placeholder[i];
+			ArrayList<String> imgPaths = albumdao.getAllImgPath();
+			albumdao.close();
+		    if(!imgPaths.isEmpty()){
+			    //create bitmap array
+			    imageBitmaps  = new Bitmap[imgPaths.size()];
+			    placeholder  = new Bitmap[imgPaths.size()];
+			    //decode the placeholder image
+			    for(int i = 0; i < imgPaths.size(); i++)
+			    	placeholder[i] = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+			    
+			    //more processing
+			    //set placeholder as all thumbnail images in the gallery initially
+			    for(int i=0; i<imageBitmaps.length; i++)
+			        imageBitmaps[i]=placeholder[i];
+		    }
 		    //get the styling attributes - use default Andorid system resources
 		    TypedArray styleAttrs = galleryContext.obtainStyledAttributes(R.styleable.PicGallery);
 		    //get the background resource

@@ -5,7 +5,7 @@
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="picture">Picture</string>
-	<string name="longpress">Long-press a thumbnail to add view larger image</string>
+	<string name="longpress">Long-press a thumbnail to view original size image and press once to view image details</string>
 	<string name="event">Event:</string>
 	<string name="place">Avenue:</string>
 	<string name="date">Date:</string>

@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class Album_database extends SQLiteOpenHelper {
+public class AlbumDAO {
 	
 	static final String dbName = "photodetails";
 	static final String detailTable = "details";
@@ -19,33 +19,67 @@ public class Album_database extends SQLiteOpenHelper {
 	static final String colDate = "Date";
 	static final String colPerson = "Name";
 	static final String colPath = "ImagePath";
-		
-	public Album_database(Context context, String name, CursorFactory factory,
-			int version) {
-		super(context, name, factory, version);
-		// TODO Auto-generated constructor stub
+	
+	private DbHelper dbhelper;
+	private final Context c;
+	private SQLiteDatabase albumDB;
+	
+	public AlbumDAO(Context context){
+		c = context;
 	}
+	
+	public AlbumDAO open(){
+		dbhelper = new DbHelper(c);
+		albumDB = dbhelper.getWritableDatabase();
+		return this;
+	}
+	
+	public void close(){
+		dbhelper.close();
+	}
+	
+	private static class DbHelper extends SQLiteOpenHelper{
+		
+		public DbHelper(Context context){
+			super(context, dbName, null, 1);
+		}
+		
+		@Override
+		public void onCreate(SQLiteDatabase db) {
 
-	@Override
-	public void onCreate(SQLiteDatabase db) {
-		db.execSQL("CREATE TABLE"+detailTable+"("+colID+"INTEGER PRIMARY KEY, "+colEvent+"TEXT,"+colPlace+" TEXT, "+colDate+" DATE, "+colPerson+" TEXT, "+colPath+" TEXT)");
+			System.out.println("create db");
+			db.execSQL("CREATE TABLE "+detailTable+" ("
+						+colID+" INTEGER PRIMARY KEY AUTOINCREMENT, "
+						+colEvent+" TEXT, "
+						+colPlace+" TEXT, "
+						+colDate+" TEXT, "
+						+colPerson+" TEXT, "
+						+colPath+" TEXT)");
+		}
+		
+		@Override
+		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+			// TODO Auto-generated method stub
+			db.execSQL("DROP TABLE IF EXIST "+ detailTable);
+			onCreate(db);
+		}
 		
 	}
 	
-	public long AcceptInput(String inputEvent, String inputPlace,String inputPerson,String inputPath){
-		SQLiteDatabase db1 = Album_database.this.getWritableDatabase();
+	public long insertData(String inputEvent, String inputPlace,String inputPerson,String inputPath){
 		ContentValues cv = new ContentValues(); 
 		cv.put(colEvent, inputEvent);
 		cv.put(colPlace, inputPlace);
 		cv.put(colPerson, inputPerson);
 		cv.put(colPath, inputPath);
-		return db1.insert(detailTable, null, cv);
+		return albumDB.insert(detailTable, null, cv);
 		
 	}
 	
 	public String getData(String path){
 		String[] column = new String[] {colEvent, colPlace, colDate, colPerson};
-		Cursor c = Album_database.this.getReadableDatabase().query(detailTable, column, colPath+"="+path, null, null, null, null);
+		System.out.println("asd2");
+		Cursor c = albumDB.query(detailTable, column, colPath+"="+path, null, null, null, null);
 		if (c!=null){
 			int ievent = c.getColumnIndex(colEvent);
 			int iplace = c.getColumnIndex(colPlace);
@@ -60,25 +94,14 @@ public class Album_database extends SQLiteOpenHelper {
 	}
 	
 	public ArrayList<String> getAllImgPath(){
-		String[] column = new String[] {colPath};
-		Cursor c = Album_database.this.getReadableDatabase().query(detailTable, column, null, null, null, null, null);
-		if (c!=null){
-			int iPath = c.getColumnIndex(colPath);
-			ArrayList<String> paths = new ArrayList<String>();
-			for(c.moveToFirst(); !c.isAfterLast();c.moveToNext()){
-				paths.add(c.getString(iPath));
-			}
-			return paths;
-		}
-		
-		
+		String[] column = new String[] {colPath, colPerson};
+		Cursor c = albumDB.query(detailTable, column, "", null, "", "", "");
 		return null;
 		
 	}
 	
 	public void deleteData(long id){
-		SQLiteDatabase db2 = Album_database.this.getWritableDatabase();
-		db2.delete(detailTable,colID+"="+id,null);
+		albumDB.delete(detailTable,colID+"="+id,null);
 	}
 	
 	public void updateData(long id, String upEvent, String upPlace,String upPerson,String upPath){
@@ -87,17 +110,9 @@ public class Album_database extends SQLiteOpenHelper {
 		cvUpdate.put(colPlace, upPlace);
 		cvUpdate.put(colPerson, upPerson);
 		cvUpdate.put(colPath, upPath);
-		SQLiteDatabase db3 = Album_database.this.getWritableDatabase();
-		db3.update(detailTable,cvUpdate,colID+"="+id,null);
+		albumDB.update(detailTable,cvUpdate,colID+"="+id,null);
 	}
 	
 	
-	
-	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		// TODO Auto-generated method stub
-		
-	}
-
 	
 }

@@ -60,15 +60,14 @@ public final class R {
     public static final class string {
         public static final int action_settings=0x7f050001;
         public static final int app_name=0x7f050000;
-        public static final int btnEditSave=0x7f05000a;
-        public static final int date=0x7f050008;
-        public static final int event=0x7f050006;
+        public static final int btnEditSave=0x7f050009;
+        public static final int date=0x7f050007;
+        public static final int event=0x7f050005;
         public static final int hello_world=0x7f050002;
+        public static final int longpress=0x7f050004;
         public static final int picture=0x7f050003;
-        public static final int place=0x7f050007;
-        public static final int select_intro=0x7f050004;
-        public static final int show_intro=0x7f050005;
-        public static final int who=0x7f050009;
+        public static final int place=0x7f050006;
+        public static final int who=0x7f050008;
     }
     public static final class style {
         /** 
@@ -105,7 +104,7 @@ public final class R {
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #PicGallery_android_galleryItemBackground android:galleryItemBackground}</code></td><td></td></tr>
+           <tr><td><code>{@link #PicGallery_android_galleryItemBackground com.example.photoalbum:android_galleryItemBackground}</code></td><td></td></tr>
            </table>
            @see #PicGallery_android_galleryItemBackground
          */
@@ -113,9 +112,9 @@ public final class R {
             0x0101004c
         };
         /**
-          <p>This symbol is the offset where the {@link android.R.attr#galleryItemBackground}
+          <p>This symbol is the offset where the {@link com.example.photoalbum.R.attr#android_galleryItemBackground}
           attribute's value can be found in the {@link #PicGallery} array.
-          @attr name android:galleryItemBackground
+          @attr name android:android_galleryItemBackground
         */
         public static final int PicGallery_android_galleryItemBackground = 0;
     };
