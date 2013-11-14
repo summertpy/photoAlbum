@@ -98,10 +98,16 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				
+				//initiate camera, take photo then save file in directory
+				int cameraData = 0;
+				dispatchTakePictureIntent(cameraData);
 			}
 		});
+	}
+	
+	private void dispatchTakePictureIntent(int actionCode) {
+	    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+	    startActivityForResult(takePictureIntent, actionCode);
 	}
 	
 	public static boolean isIntentAvailable(Context context, String action) {
