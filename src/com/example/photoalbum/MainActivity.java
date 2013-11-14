@@ -73,23 +73,15 @@ public class MainActivity extends Activity {
 		picGallery.setOnItemLongClickListener(new OnItemLongClickListener() {
 		    //handle long clicks
 		    public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {
-		        //take user to choose an image
-		    	//update the currently selected position so that we assign the imported bitmap to correct item
-		    	currentPic = position;
-		    	//take the user to their chosen image selection app (gallery or file manager)
-		    	Intent pickIntent = new Intent();
-		    	pickIntent.setType("image/*");
-		    	pickIntent.setAction(Intent.ACTION_GET_CONTENT);
-		    	//we will handle the returned data in onActivityResult
-		    	startActivityForResult(Intent.createChooser(pickIntent, "Select Picture"), PICKER);
+				
 		    	return true;
 		    }
 		});
-		//set the click listener for each item in the thumbnail gallery
+		//set the click listener for each item in the thumbnail gallery,display details
 		picGallery.setOnItemClickListener(new OnItemClickListener() {
 		    //handle clicks
 		    public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-		        //set the larger image view to display the chosen bitmap calling method of adapter class
+		        //display detail
 		        picView.setImageBitmap(imgAdapt.getPic(position));
 		    }
 		});
