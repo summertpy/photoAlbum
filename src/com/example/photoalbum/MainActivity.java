@@ -1,12 +1,19 @@
 package com.example.photoalbum;
 import com.example.photoalbum.AlbumDAO;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import android.os.Bundle;
+import android.os.Environment;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
+import android.util.Log;
 import android.view.Menu;
 import android.app.Activity;
 import android.content.Context;
@@ -49,10 +56,12 @@ public class MainActivity extends Activity {
 	private boolean isclick = false, editable = false;
 	private int x;
 	private AlbumDAO albumdao = new AlbumDAO(this);
+	final static int cameraData = 0;
+	String dirc = "ntg";
+	Bitmap bmp;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		System.out.println("asd");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		etEvent = (EditText)findViewById(R.id.editevent);
@@ -81,7 +90,7 @@ public class MainActivity extends Activity {
 						isclick = true;	
 					}else{
 						albumdao.open();
-						albumdao.insertData(etEvent.getText().toString(), etAvenue.getText().toString(), etDate.getText().toString(), etWithWho.getText().toString());
+						albumdao.updateData((String)edit.getTag(), etEvent.getText().toString(), etAvenue.getText().toString(), etDate.getText().toString(), etWithWho.getText().toString());
 						albumdao.close();
 				
 						edit.setText("Edit");
@@ -106,6 +115,22 @@ public class MainActivity extends Activity {
 		    //handle clicks
 		    public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 		    	editable = true;
+		    	edit.setTag(imgAdapt.getPath(position));
+
+				albumdao.open();
+				String d = albumdao.getData(imgAdapt.getPath(position));
+				albumdao.close();
+				String [] t = d.split(";");
+				for(int i = 0; i < t.length; i++)
+					if(t[i].equals("null"))
+						t[i] = "";
+				if(t.length == 4)
+				{
+					etEvent.setText(t[0]);
+					etAvenue.setText(t[1]);
+					etDate.setText(t[2]);
+					etWithWho.setText(t[3]);
+				}
 		    }
 		});
 		takePhoto = (ImageButton)findViewById(R.id.imageButton1);
@@ -114,8 +139,23 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				//initiate camera, take photo then save file in directory
-				int cameraData = 0;
-				dispatchTakePictureIntent(cameraData);
+				Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+				File f;
+				try {
+					f = createImageFile();
+					dirc = f.getAbsolutePath();
+					i.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+					albumdao.open();
+					Log.d("insert id", ""+albumdao.insertData(dirc));
+					albumdao.close();
+					imgAdapt.addDirc(dirc);
+					Log.d("saved, img dirc: " , dirc);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					Log.d("Fail to save image, img dirc: " , dirc);
+				}
+				startActivityForResult(i, cameraData);
 			}
 		});
 	}
@@ -129,67 +169,61 @@ public class MainActivity extends Activity {
     	d.show();
 	}
 	
-	private void dispatchTakePictureIntent(int actionCode) {
-	    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-	    startActivityForResult(takePictureIntent, actionCode);
-	}
-	
-	public static boolean isIntentAvailable(Context context, String action) {
-	    final PackageManager packageManager = context.getPackageManager();
-	    final Intent intent = new Intent(action);
-	    List<ResolveInfo> list =
-	            packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-	    return list.size() > 0;
-	}
-	
 	public class PicAdapter extends BaseAdapter {
 		//use the default gallery background image
 		int defaultItemBackground;
 		//gallery context
 		private Context galleryContext;
 		//array to store bitmaps to display
-		private Bitmap[] imageBitmaps;
+		private ArrayList<Bitmap> imageBitmaps;
 		//placeholder bitmap for empty spaces in gallery
 		Bitmap [] placeholder;
+		ArrayList<String> al;
 		
 		public PicAdapter(Context c) {
 		    //instantiate context
 		    galleryContext = c;
 		    
 			albumdao.open();
-			ArrayList<String> al = albumdao.getAllImgPath();
-			albumdao.close();		
+			al = albumdao.getAllImgPath();
+			Log.d("arraylist length", ""+al.size());
 		    
-		    //create bitmap array
-		    imageBitmaps  = new Bitmap[10];
-		    placeholder  = new Bitmap[10];
-		    //decode the placeholder image
-	    	placeholder[0] = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-	    	placeholder[1] = BitmapFactory.decodeResource(getResources(), R.drawable.bleh);
-	    	placeholder[2] = BitmapFactory.decodeResource(getResources(), R.drawable.dance);
-	    	placeholder[3] = BitmapFactory.decodeResource(getResources(), R.drawable.hehe);
-	    	placeholder[4] = BitmapFactory.decodeResource(getResources(), R.drawable.hiao);
-	    	placeholder[5] = BitmapFactory.decodeResource(getResources(), R.drawable.what);
-	    	placeholder[6] = BitmapFactory.decodeResource(getResources(), R.drawable.yeah);
-	    	placeholder[7] = BitmapFactory.decodeResource(getResources(), R.drawable.yeah2);
-	    	placeholder[8] = BitmapFactory.decodeResource(getResources(), R.drawable.mickeyblind);
-	    	placeholder[9] = BitmapFactory.decodeResource(getResources(), R.drawable.onigoat);
-		    //more processing
-		    //set placeholder as all thumbnail images in the gallery initially
-		    for(int i=0; i<imageBitmaps.length; i++)
-		        imageBitmaps[i]=placeholder[i];
-		    //get the styling attributes - use default Andorid system resources
+		    imageBitmaps  = new ArrayList<Bitmap>();
+		    placeholder  = new Bitmap[al.size()];
+
+		    for(int i = 0; i < al.size(); i++){
+		    	placeholder[i] = BitmapFactory.decodeFile(al.get(i));
+
+				Log.d("arraylist data "+i, ""+al.get(i));
+		    }
+
+		    for(int i=0; i < al.size(); i++)
+		        if(placeholder[i] != null)
+		        	imageBitmaps.add(placeholder[i]);
+		        else{
+		        	albumdao.deleteData(al.get(i));
+		        }
+
+			albumdao.close();		
+			
 		    TypedArray styleAttrs = galleryContext.obtainStyledAttributes(R.styleable.PicGallery);
-		    //get the background resource
+
 		    defaultItemBackground = styleAttrs.getResourceId(
 		        R.styleable.PicGallery_android_galleryItemBackground, 0);
-		    //recycle attributes
+
 		    styleAttrs.recycle();
 		}
 		
 		//return number of data items i.e. bitmap images
 		public int getCount() {
-		    return imageBitmaps.length;
+		    return imageBitmaps.size();
+		}
+		
+		public String getPath(int position){
+			if(al.size() > position)
+				return al.get(position);
+			else
+				return null;
 		}
 		
 		//return item at specified position
@@ -207,7 +241,7 @@ public class MainActivity extends Activity {
 		    //create the view
 		    ImageView imageView = new ImageView(galleryContext);
 		    //specify the bitmap at this position in the array
-		    imageView.setImageBitmap(imageBitmaps[position]);
+		    imageView.setImageBitmap(imageBitmaps.get(position));
 		    //set layout options
 		    imageView.setLayoutParams(new Gallery.LayoutParams(300, 200));
 		    //scale type within view area
@@ -222,18 +256,93 @@ public class MainActivity extends Activity {
 		public void addPic(Bitmap newPic)
 		{
 		    //set at currently selected index
-		    imageBitmaps[currentPic] = newPic;
+		    imageBitmaps.add(newPic);
+		    notifyDataSetChanged();
+		}
+		
+		public void addDirc(String path){
+			al.add(path);
 		}
 		
 		//return bitmap at specified position for larger display
 		public Bitmap getPic(int posn)
 		{
 		    //return bitmap at posn index
-		    return imageBitmaps[posn];
+		    return imageBitmaps.get(posn);
 		}
 	}
 	
+	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// TODO Auto-generated method stub
+		//super.onActivityResult(requestCode, resultCode, data);
+		Log.d("activityreturn", ""+requestCode);
+			if (resultCode == RESULT_OK){
+				imgAdapt.addPic(BitmapFactory.decodeFile(dirc));
+				 //setPic();
+			}
+	}
+	
+	private File getAlbumDir() {
+		File storageDir = null;
+
+		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+			
+			storageDir = new File(
+					Environment.getExternalStorageDirectory()
+							+ "/dcim/"+
+							  "CameraSample"
+							);
+
+			if (storageDir != null) {
+				if (! storageDir.mkdirs()) {
+					if (! storageDir.exists()){
+						Log.d("CameraSample", "failed to create directory");
+						return null;
+					}
+				}
+			}
+			
+		} else {
+			Log.v(getString(R.string.app_name), "External storage is not mounted READ/WRITE.");
+		}
+		
+		return storageDir;
+	}
+	
+	@SuppressLint("SimpleDateFormat")
+	private File createImageFile() throws IOException {
+	    // Create an image file name
+	    String timeStamp = 
+	        new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+	    String imageFileName = "IMG_" + timeStamp + "_";
+	    File image = File.createTempFile(imageFileName, ".jpg", getAlbumDir());
+	    return image;
+	}
+	private void setPic() {
+	    // Get the dimensions of the View
+	    int targetW = 400;
+	    int targetH = 300;
+	  
+	    // Get the dimensions of the bitmap
+	    BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+	    bmOptions.inJustDecodeBounds = true;
+	    BitmapFactory.decodeFile(dirc, bmOptions);
+	    int photoW = bmOptions.outWidth;
+	    int photoH = bmOptions.outHeight;
+	  
+	    // Determine how much to scale down the image
+	    int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+	  
+	    // Decode the image file into a Bitmap sized to fill the View
+	    bmOptions.inJustDecodeBounds = false;
+	    bmOptions.inSampleSize = scaleFactor;
+	    bmOptions.inPurgeable = true;
+	  
+	    Bitmap bitmap = BitmapFactory.decodeFile(dirc, bmOptions);
+		imgAdapt.addPic(bitmap);
+	}
+	/*protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode == RESULT_OK) {
 		    //check if we are returning from picture selection
 		    if (requestCode == PICKER) {
@@ -297,7 +406,7 @@ public class MainActivity extends Activity {
 		//superclass method
 		super.onActivityResult(requestCode, resultCode, data);
 
-	}
+	}*/
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
